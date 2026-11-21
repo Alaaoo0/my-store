@@ -17,7 +17,7 @@ model Product {
   imageUrl    String?
   stock       Int         @default(10)
   category    String      @default("أجهزة الكترونية")
-  variants    String?     // 👈 هاد الحقل الجديد للخيارات
+  variants    String?
   createdAt   DateTime    @default(now())
   orderItems  OrderItem[]
   reviews     Review[]
@@ -46,7 +46,7 @@ model OrderItem {
   productId String
   quantity  Int
   price     Int
-  variant   String? // 👈 هاد الحقل عشان نحفظ الخيار بالطلب
+  variant   String?
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
@@ -130,4 +130,12 @@ model Category {
   id        String   @id @default(cuid())
   name      String   @unique
   createdAt DateTime @default(now())
+}
+
+// 👇 الجدول الجديد لحماية الأدمن
+model LoginAttempt {
+  id          String   @id @default(cuid())
+  ip          String   @unique
+  attempts    Int      @default(0)
+  lastAttempt DateTime @default(now())
 }
