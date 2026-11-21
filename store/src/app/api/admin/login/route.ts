@@ -3,15 +3,15 @@ import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
-  const { password } = await req.json();
-  const adminPassword = process.env.ADMIN_PASSWORD || "BossMan2026!";
-  const cookieStore = await cookies();
-
-  // 1. الحصول على IP المستخدم
-  const ip = req.headers.get('x-forwarded-for') || 'unknown-ip';
-
   try {
-    // 2. التحقق من عدد المحاولات في قاعدة البيانات
+    const { password } = await req.json();
+    const adminPassword = process.env.ADMIN_PASSWORD || "BossMan2026!";
+    const cookieStore = await cookies();
+
+    // 👇 تأكدنا إنه الـ IP ما يكون فاضي
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown-ip';
+
+    // 1. التحقق من عدد المحاولات في قاعدة البيانات
     const attemptRecord = await prisma.loginAttempt.findUnique({
       where: { ip: ip },
     });
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. التحقق من كلمة السر
+    // 2. التحقق من كلمة السر
     if (password === adminPassword) {
       cookieStore.set('admin_session', 'true', {
         httpOnly: true,
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       
       return NextResponse.json({ success: true });
     } else {
-      // 4. إذا كلمة السر غلط، بنزيد العداد
+      // 3. إذا كلمة السر غلط، بنزيد العداد
       if (attemptRecord) {
         await prisma.loginAttempt.update({
           where: { ip: ip },
@@ -61,8 +61,8 @@ export async function POST(req: Request) {
       }
       return NextResponse.json({ message: 'كلمة المرور خاطئة.' }, { status: 401 });
     }
-  } catch (error) {
-    console.error("Login Error:", error);
+  } catch (error: any) {
+    console.error("LOGIN ERROR:", error); // 👈 هاد السطر رح يطبع الخطأ بالضبط بالـ Logs
     return NextResponse.json({ message: 'حدث خطأ في السيرفر.' }, { status: 500 });
   }
 }
