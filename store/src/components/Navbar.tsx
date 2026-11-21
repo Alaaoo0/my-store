@@ -132,7 +132,6 @@ export default function Navbar({ siteName }: { siteName: string }) {
   };
 
   const handleLogout = async () => {
-    // 👇 هون التعديل: بنحفظ السلة والمفضلة مرتبطين بإيميل المستخدم
     if (user && user.email) {
       const currentCart = localStorage.getItem("store_cart");
       if (currentCart) localStorage.setItem(`saved_cart_${user.email}`, currentCart);
@@ -172,6 +171,11 @@ export default function Navbar({ siteName }: { siteName: string }) {
             <div className="border-r border-gray-300 pr-1.5 flex items-center gap-1 sm:gap-2 ml-1">
               {mounted && user ? (
                 <>
+                  {/* 👇 زر طلباتي صار ظاهر عالموبايل */}
+                  <Link href="/orders" className="text-xs sm:text-sm font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1">
+                    <span className="text-base sm:text-lg">📦</span> <span className="hidden xs:inline">طلباتي</span>
+                  </Link>
+                  
                   <Link href="/wallet" className="flex items-center gap-1 bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold text-[10px] sm:text-xs whitespace-nowrap">
                     💳 ${Number(balance).toFixed(2)}
                   </Link>
